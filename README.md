@@ -1,6 +1,6 @@
 # GA_NodeREDTrigger
 
-See the provided flow to check for new alarms.
+See the provided flow to check for new alarms. Import the flow code into your nodeRED frontend and hook it up to whatever you want to use it for.
 
 ## Workflow
 Click on Start to activate the 10s poll intervall. Click on Stop to halt it again.
