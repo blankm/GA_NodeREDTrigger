@@ -1,0 +1,192 @@
+[
+    {
+        "id": "9ea5bc75.f93ec8",
+        "type": "tab",
+        "label": "GA_Alarmtrigger",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "1edc17c2.e1868",
+        "type": "http request",
+        "z": "9ea5bc75.f93ec8",
+        "name": "GetAllAlarms",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "body",
+        "url": "https://app.groupalarm.com/api/v1/alarms/user",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 260,
+        "y": 240,
+        "wires": [
+            [
+                "8a2d57f3.3604c",
+                "f9c1df23.c207e"
+            ]
+        ]
+    },
+    {
+        "id": "8a2d57f3.3604c",
+        "type": "debug",
+        "z": "9ea5bc75.f93ec8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 450,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "bbfd5a9d.b53bf8",
+        "type": "function",
+        "z": "9ea5bc75.f93ec8",
+        "name": "RequestGenerator",
+        "func": "msg.payload = \"{}\";\nmsg.headers = {};\nmsg.headers['Content-Type'] = 'application/json';\nmsg.headers['Personal-Access-Token'] = 'myAccessToken';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 250,
+        "y": 180,
+        "wires": [
+            [
+                "1edc17c2.e1868"
+            ]
+        ]
+    },
+    {
+        "id": "f9c1df23.c207e",
+        "type": "function",
+        "z": "9ea5bc75.f93ec8",
+        "name": "NewAlarmChecker",
+        "func": "\nvar alarms = msg.payload.alarms;\n\n//Return false means, no alarm lately\nmsg.payload = false;\n\n// Check if there are any alarms at all\nif(alarms.length > 0)\n{\n    // AFAIK, the newest alarm ist always at array[0]\n    // Check if the alarm at [0] has happend recently\n    var now = new Date();\n    var alarm0time = new Date(alarms[0].startDate);\n    \n    var difference = now.getTime() - alarm0time.getTime();\n    \n    // If Alarm happend less than 30s ago, pull trigger\n    if(difference > 0 && difference < 30000)\n    {\n        msg.payload = true;\n    }\n}\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 250,
+        "y": 300,
+        "wires": [
+            [
+                "facdd2ec.e28aa",
+                "9b7cf8fd.933ce8"
+            ]
+        ]
+    },
+    {
+        "id": "facdd2ec.e28aa",
+        "type": "link out",
+        "z": "9ea5bc75.f93ec8",
+        "name": "GA_AlarmOut",
+        "links": [
+            "7d1f2a6f.a9dfc4"
+        ],
+        "x": 445,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "9b7cf8fd.933ce8",
+        "type": "debug",
+        "z": "9ea5bc75.f93ec8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "e92c9f26.08ab",
+        "type": "trigger",
+        "z": "9ea5bc75.f93ec8",
+        "name": "StartStopTrigger",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-10",
+        "extend": false,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 310,
+        "y": 120,
+        "wires": [
+            [
+                "bbfd5a9d.b53bf8"
+            ]
+        ]
+    },
+    {
+        "id": "162c116f.b7e167",
+        "type": "inject",
+        "z": "9ea5bc75.f93ec8",
+        "name": "Start",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 60,
+        "wires": [
+            [
+                "e92c9f26.08ab"
+            ]
+        ]
+    },
+    {
+        "id": "4cd49e2.cb0b86",
+        "type": "inject",
+        "z": "9ea5bc75.f93ec8",
+        "name": "Stop",
+        "props": [
+            {
+                "p": "reset",
+                "v": "true",
+                "vt": "json"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 110,
+        "y": 100,
+        "wires": [
+            [
+                "e92c9f26.08ab"
+            ]
+        ]
+    }
+]
